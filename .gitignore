@@ -1,0 +1,6 @@
+**/__pycache__
+*.swp
+tags
+*.pyc
+dist/
+cuco.egg-info/
