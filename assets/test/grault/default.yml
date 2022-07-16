@@ -1,0 +1,7 @@
+_type: grault
+
+bar: 34
+baz: 
+  foo:
+    - 1
+    - 2
