@@ -1,7 +1,5 @@
-import sys
 from unittest import main, TestCase
 
-from cuco.expansion import map_and_expand
 from cuco.utils.file import load_yaml
 
 

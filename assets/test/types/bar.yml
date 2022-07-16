@@ -1,0 +1,5 @@
+_super: foo
+
+baz:
+  _self: baz
+  _type: list

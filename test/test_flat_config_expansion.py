@@ -1,4 +1,3 @@
-import sys
 from unittest import main, TestCase
 
 from cuco.expansion import map_and_expand

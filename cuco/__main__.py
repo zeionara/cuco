@@ -54,6 +54,9 @@ def config_parser(object_type: str = None):
         if object_type is None:
             object_type = camel_case_to_kebab_case(cls.__name__)
 
+        if object_type in object_types:
+            raise ValueError(f'Cannot overwrite config parser for type "{object_type}", the label is already associated with another class')
+
         object_types[object_type] = cls
 
         return cls
@@ -96,7 +99,8 @@ def make_configs(path: str, type_definition_path_pattern: str, verbose: bool = F
     for config in map_and_expand(config, config_type_specification, config_name_key = config_name_key):
         parsed_configs.append(parsed_config := load(config))
 
-        post_process_config(parsed_config, **kwargs)
+        if post_process_config is not None:
+            post_process_config(parsed_config, **kwargs)
 
         if verbose:
             print('parsed config')
