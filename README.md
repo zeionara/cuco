@@ -49,7 +49,7 @@ The last step is calling method `make_configs` which will read all the configura
 from .Foo import Foo
 
 configs = make_configs(
-    path = 'assets/foo/default.yml', type_specification_root = 'data/types'
+    path = 'assets/foo/default.yml', type_specification_root = 'assets/types'
 )
 ```
 
