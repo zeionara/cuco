@@ -15,18 +15,16 @@ pip install cuco
 To use the package, first, annotate some of your classes with annotator `config_parser` according to the following example:
 
 ```py
-from cuco import config_parser
+from dataclasses import dataclass
+from cuco import config_parser, Config
 
 @config_parser()
 @dataclass
-class Foo:
+class Foo(Config):
     bar: int = 0
     baz: str = None
 
     name: str = None  # This field contains configuration name, which includes values for alternating configuration fields in a particular setup
-
-    def load(**kwargs):
-        return Foo(**kwargs)
 ```
 
 Then you would need to create a file with name `assets/types/foo.yml` for this class with specification of keys which are allowed to set up in this file (the following example demonstrates that field `qux` from configuration file will be translated into the field `bar` of the generated objects):
@@ -38,6 +36,8 @@ qux: bar
 After that you finally can create a file with name `assets/foo/default.yml` with some value for the configurable fields (the given example demonstrates array consisting of 2 values, which will lead to generation of 2 config objects):
 
 ```yaml
+_type: foo
+
 qux:
     - 1
     - 2
@@ -49,7 +49,7 @@ The last step is calling method `make_configs` which will read all the configura
 from .Foo import Foo
 
 configs = make_configs(
-    path = 'assets/foo/default.yml', type_definition_path_pattern = 'data/types/{type}.yml'
+    path = 'assets/foo/default.yml', type_specification_root = 'data/types'
 )
 ```
 
