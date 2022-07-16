@@ -1,8 +1,10 @@
+<p align="center">
+    <img src="assets/logo.png"/>
+</p>
+
 # CuCo
 
 CuCo (**Cu**te **Co**nfiguration) is a project for making it easier to write configuration files which may be automatically converted into a set of alternative system setups.
-
-![logo](assets/logo.png)
 
 ## Installation
 
