@@ -7,27 +7,27 @@ from test.Baz import Baz
 from cuco import make_configs
 
 
-TYPE_DEFINITION_PATH_PATTERN = 'assets/test/types/{type}.yml'
+TYPE_SPECIFICATION_ROOT = 'assets/test/types'
 
 
-class TestFlatConfigExpansion(TestCase):
+class TestConfigObjectCreation(TestCase):
     def test_flat_config_with_two_fields(self):
         configs = make_configs(
-            path = 'assets/test/foo/default.yml', type_definition_path_pattern = TYPE_DEFINITION_PATH_PATTERN
+            path = 'assets/test/foo/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
         )
 
         self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')
 
     def test_config_with_superclass_and_list_field(self):
         configs = make_configs(
-            path = 'assets/test/bar/default.yml', type_definition_path_pattern = TYPE_DEFINITION_PATH_PATTERN
+            path = 'assets/test/bar/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
         )
 
         self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')
 
     def test_config_with_custom_object_type_and_field_names(self):
         configs = make_configs(
-            path = 'assets/test/qux/default.yml', type_definition_path_pattern = TYPE_DEFINITION_PATH_PATTERN
+            path = 'assets/test/qux/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
         )
 
         self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')

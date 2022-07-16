@@ -2,12 +2,14 @@ from .utils.string import camel_case_to_kebab_case
 from .utils.file import read_yaml, load_yaml
 from .constants import TYPE_METADATA_FIELD, SELF_METADATA_FIELD, SUPER_METADATA_FIELD, LIST_TYPE, DEFAULT_CONFIG_NAME_KEY
 from .expansion import map_and_expand
+from .ModuleName import ModuleName
 
 
 object_types = {}
+module_names = {}
 
 
-def handle_nested_type_references(config: dict, path_pattern: str):
+def handle_nested_type_references(config: dict, root: str):
     items = tuple(config.items())
 
     for key, value in items:
@@ -20,36 +22,37 @@ def handle_nested_type_references(config: dict, path_pattern: str):
                 nested_type = value[TYPE_METADATA_FIELD]
 
                 if nested_type is not None and nested_type != LIST_TYPE:
-                    config[key] = nested_type_specification = read_config_type_specification(nested_type, path_pattern = path_pattern)
+                    config[key] = nested_type_specification = read_config_type_specification(nested_type, root = root)
                     nested_type_specification[SELF_METADATA_FIELD] = nested_self
                     nested_type_specification[TYPE_METADATA_FIELD] = nested_type
                     continue
 
-            handle_nested_type_references(value, path_pattern = path_pattern)
+            handle_nested_type_references(value, root = root)
 
     if (super_type := config.get(SUPER_METADATA_FIELD)):
-        for key, value in read_config_type_specification(super_type, path_pattern = path_pattern).items():
+        for key, value in read_config_type_specification(super_type, root = root).items():
             if key in config:
                 # raise ValueError(f'Cannot override key "{key}" - it is specified in both - superclass and subclass')
                 continue  # Values in subclasses override values in superclasses
             config[key] = value
 
 
-def read_config_type_specification(type_: str, path_pattern: str):
-    assert type_ == LIST_TYPE or type_ in object_types, f'Unknown config object type "{type_}"'
+def read_config_type_specification(type_: str, root: str):
+    assert type_ == LIST_TYPE or (type_ in object_types and type_ in module_names), f'Unknown config object type "{type_}"'
 
-    path = path_pattern.format(type = type_)
+    # path = path_pattern.format(type = type_)
+    path = module_names[type_].get_path(root)
 
     mapping = read_yaml(path)
 
-    handle_nested_type_references(mapping, path_pattern = path_pattern)
+    handle_nested_type_references(mapping, root = root)
 
     return mapping
 
 
-def config_parser(object_type: str = None):
+def config_parser(object_type: str = None, module_name: str = None):
     def config_parser_(cls):
-        nonlocal object_type
+        nonlocal object_type, module_name
 
         if object_type is None:
             object_type = camel_case_to_kebab_case(cls.__name__)
@@ -57,7 +60,11 @@ def config_parser(object_type: str = None):
         if object_type in object_types:
             raise ValueError(f'Cannot overwrite config parser for type "{object_type}", the label is already associated with another class')
 
+        if module_name is None:
+            module_name = object_type
+
         object_types[object_type] = cls
+        module_names[object_type] = ModuleName(module_name)
 
         return cls
 
@@ -88,13 +95,13 @@ def load(config: dict):  # Initialize classes with given config moving from the 
     return parsed_config
 
 
-def make_configs(path: str, type_definition_path_pattern: str, verbose: bool = False, post_process_config: callable = None, config_name_key: str = DEFAULT_CONFIG_NAME_KEY, **kwargs):
+def make_configs(path: str, type_specification_root: str, verbose: bool = False, post_process_config: callable = None, config_name_key: str = DEFAULT_CONFIG_NAME_KEY, **kwargs):
     assert len(kwargs.keys()) < 1 or post_process_config is not None, 'If kwargs are passed, then config post processor must be defined'
 
     config = load_yaml(path)
     parsed_configs = []
 
-    config_type_specification = read_config_type_specification(config[TYPE_METADATA_FIELD], path_pattern = type_definition_path_pattern)
+    config_type_specification = read_config_type_specification(config[TYPE_METADATA_FIELD], root = type_specification_root)
 
     for config in map_and_expand(config, config_type_specification, config_name_key = config_name_key):
         parsed_configs.append(parsed_config := load(config))

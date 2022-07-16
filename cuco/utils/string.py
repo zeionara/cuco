@@ -1,3 +1,4 @@
+import os
 import re
 
 CAMEL_CASE_TO_KEBAB_CASE_CONVERTING_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
@@ -5,6 +6,8 @@ METADATA_FIELD_PATTERN = re.compile(r'_.+')
 
 YAML_FILE_PATH_PATTERN = re.compile(r'.+\.ya?ml')
 YAML_FOLDER_PATH_PATTERN = re.compile(r'@(.+)')
+
+BACKSTEP_MODULE_NAME_COMPONENT_PATTERN = re.compile(r'\.\.+')
 
 
 def camel_case_to_kebab_case(string: str):
@@ -27,3 +30,21 @@ def get_yaml_folder_path(string: str):
     if (match := YAML_FOLDER_PATH_PATTERN.fullmatch(string)) is None:
         return None
     return match.group(1)
+
+
+def module_name_to_path(name: str):
+    backstep_splits = BACKSTEP_MODULE_NAME_COMPONENT_PATTERN.split(name)
+
+    if len(backstep_splits) > 1:
+        path_components = [] if (current_backstep_split := backstep_splits[0]) == '' else [current_backstep_split]
+        next_backstep_split_index = 1
+
+        for match_ in BACKSTEP_MODULE_NAME_COMPONENT_PATTERN.findall(name):
+            path_components.extend('..' for _ in range(len(match_) - 1))
+            if (current_backstep_split := backstep_splits[next_backstep_split_index]) != '':
+                path_components.extend(current_backstep_split.split('.'))
+            next_backstep_split_index += 1
+    else:
+        path_components = name.split(".")
+
+    return f'{os.path.join(*path_components)}.yml'
