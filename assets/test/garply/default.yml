@@ -1,0 +1,4 @@
+_type: garply
+
+foo: garply
+bar: '{{foo}}waldo'

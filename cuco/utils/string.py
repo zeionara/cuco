@@ -9,6 +9,8 @@ YAML_FOLDER_PATH_PATTERN = re.compile(r'@(.+)')
 
 BACKSTEP_MODULE_NAME_COMPONENT_PATTERN = re.compile(r'\.\.+')
 
+LINKED_FIELD_NAME = re.compile(r'\{\{([^}{]+)\}\}')
+
 
 def camel_case_to_kebab_case(string: str):
     return CAMEL_CASE_TO_KEBAB_CASE_CONVERTING_PATTERN.sub('-', string).lower()
@@ -48,3 +50,14 @@ def module_name_to_path(name: str):
         path_components = name.split(".")
 
     return f'{os.path.join(*path_components)}.yml'
+
+
+def substitute_linked_values(kwargs: dict):
+    for key, value in kwargs.items():
+        if isinstance(value, str):
+            for match_ in LINKED_FIELD_NAME.finditer(value):
+                field_reference = match_.group(0)
+                field_name = match_.group(1)
+                if (referenced_value := kwargs.get(field_name)) is not None:
+                    value = value.replace(field_reference, referenced_value)
+        kwargs[key] = value

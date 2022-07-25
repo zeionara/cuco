@@ -5,6 +5,7 @@ from test.Bar import Bar
 from test.Baz import Baz
 from test.Corge import Corge
 from test.Grault import Grault
+from test.Garply import Garply
 
 from cuco import make_configs
 
@@ -48,6 +49,13 @@ class TestConfigObjectCreation(TestCase):
 
         self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')
         self.assertEqual(set(config.name for config in configs), {'baz.foo=1', 'baz.foo=2'}, 'Config names do not match')
+
+    def test_config_with_linked_values(self):
+        configs = make_configs(
+            path = 'assets/test/garply/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
+        )
+
+        self.assertEqual(configs[0].bar, 'garplywaldo', 'Linked values are handled incorrectly')
 
 
 if __name__ == "__main__":
