@@ -127,7 +127,7 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
 
             for value in current_value:
                 if isinstance(value, dict):
-                    value_copy = dict(value)
+                    # value_copy = dict(value)
                     for value_ in _map_and_expand(
                         sorted(tuple(value.keys())),
                         configs = [value],
@@ -137,7 +137,7 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
                         new_config = dict(config)
                         new_config[mapped_key] = value_
                         updated_configs.append(new_config)
-                        _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value_copy)  # if root_config is None else root_config
+                        # _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value_copy)  # if root_config is None else root_config
                 else:
                     new_config = dict(config)
                     new_config[mapped_key] = value
