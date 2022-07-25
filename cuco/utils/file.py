@@ -27,18 +27,42 @@ def read_referenced_folder(path: str = None):
     return items
 
 
+def read_referenced_file(value: str, path: str = None):
+    if isinstance(value, str):
+        if is_yaml_file_path(value):
+            nested_config = load_yaml(value if path is None else os.path.join(path, value))
+            read_referenced_files(nested_config, path = Path(value).parent if path is None else os.path.join(path, Path(value).parent))
+            return nested_config
+        if (folder_path := get_yaml_folder_path(value)) is not None:
+            return read_referenced_folder(path = os.path.join(folder_path if path is None else os.path.join(path, folder_path)))
+        return value
+
+    if isinstance(value, dict):
+        read_referenced_files(value, path = path)
+
+    return value
+
+
 def read_referenced_files(config: dict, path: str = None):
     items = tuple(config.items())
 
     for key, value in items:
-        if isinstance(value, str):
-            if is_yaml_file_path(value):
-                config[key] = nested_config = load_yaml(value if path is None else os.path.join(path, value))
-                read_referenced_files(nested_config, path = Path(value).parent if path is None else os.path.join(path, Path(value).parent))
-            elif (folder_path := get_yaml_folder_path(value)) is not None:
-                config[key] = read_referenced_folder(path = os.path.join(folder_path if path is None else os.path.join(path, folder_path)))
-        elif isinstance(value, dict):
-            read_referenced_files(value, path = path)
+        if isinstance(value, (set, list, tuple)):
+            config[key] = [
+                read_referenced_file(item, path)
+                for item in value
+            ]
+        else:
+            config[key] = read_referenced_file(value, path)
+
+        # if isinstance(value, str):
+        #     if is_yaml_file_path(value):
+        #         config[key] = nested_config = load_yaml(value if path is None else os.path.join(path, value))
+        #         read_referenced_files(nested_config, path = Path(value).parent if path is None else os.path.join(path, Path(value).parent))
+        #     elif (folder_path := get_yaml_folder_path(value)) is not None:
+        #         config[key] = read_referenced_folder(path = os.path.join(folder_path if path is None else os.path.join(path, folder_path)))
+        # elif isinstance(value, dict):
+        #     read_referenced_files(value, path = path)
 
 
 def load_yaml(path: str = None, string: str = None):

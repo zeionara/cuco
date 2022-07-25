@@ -126,13 +126,25 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
                     continue  # It means that property contains list which should not be expanded
 
             for value in current_value:
-                new_config = dict(config)
-                new_config[mapped_key] = value
-
-                updated_configs.append(new_config)
+                if isinstance(value, dict):
+                    value_copy = dict(value)
+                    for value_ in _map_and_expand(
+                        sorted(tuple(value.keys())),
+                        configs = [value],
+                        mapping = mapping.get_mapping_of_nested_fields(current_key),
+                        config_name_key = config_name_key
+                    ):
+                        new_config = dict(config)
+                        new_config[mapped_key] = value_
+                        updated_configs.append(new_config)
+                        _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value_copy)  # if root_config is None else root_config
+                else:
+                    new_config = dict(config)
+                    new_config[mapped_key] = value
+                    updated_configs.append(new_config)
+                    _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value)  # if root_config is None else root_config
                 # print('Root config is')
                 # print(root_config)
-                _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value)  # if root_config is None else root_config
         elif is_not_metadata_field and isinstance(current_value, dict) and should_be_expanded(config, current_key):
             if TYPE_METADATA_FIELD not in current_value and mapping.data is not None and (nested_mapping := mapping.data.get(current_key)) is not None and TYPE_METADATA_FIELD in nested_mapping: 
                 current_value[TYPE_METADATA_FIELD] = nested_mapping[TYPE_METADATA_FIELD]

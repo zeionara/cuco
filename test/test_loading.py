@@ -1,6 +1,7 @@
 from unittest import main, TestCase
 
 from cuco.utils.file import load_yaml
+from cuco.expansion import map_and_expand
 
 
 class TestLoading(TestCase):
@@ -26,6 +27,11 @@ class TestLoading(TestCase):
 
     def test_config_with_nested_folders(self):
         self.assertEqual(load_yaml('assets/test/nested-folders/foo.yml'), {'foo': {'bar': {'baz': [[{'quux': 'corge'}]]}}})
+
+    def test_config_with_file_reference_list(self):
+        # print(load_yaml('assets/test/file-lists/foo.yml'))
+        # print(map_and_expand(config = load_yaml('assets/test/file-lists/foo.yml')))
+        self.assertEqual(len(map_and_expand(config = load_yaml('assets/test/file-lists/foo.yml'))), 4)
 
 
 if __name__ == "__main__":
