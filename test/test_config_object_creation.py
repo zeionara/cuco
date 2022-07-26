@@ -7,13 +7,26 @@ from test.Corge import Corge
 from test.Grault import Grault
 from test.Garply import Garply
 
-from cuco import make_configs
+from cuco import make_config, make_configs, InvalidConfigException
 
 
 TYPE_SPECIFICATION_ROOT = 'assets/test/types'
 
 
 class TestConfigObjectCreation(TestCase):
+    def test_flat_config_with_two_fields_using_method_for_single_config_creation_with_invalid_file(self):
+        with self.assertRaises(InvalidConfigException):
+            make_config(
+                path = 'assets/test/foo/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
+            )
+
+    def test_flat_config_with_two_fields_using_method_for_single_config_creation(self):
+        config = make_config(
+            path = 'assets/test/foo/single.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
+        )
+        
+        self.assertEqual((config.foo, config.bar, config.name), (17, 'baz', ''), 'Generated config contains invalid values')
+
     def test_flat_config_with_two_fields(self):
         configs = make_configs(
             path = 'assets/test/foo/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT

@@ -3,6 +3,7 @@ from .utils.file import read_yaml, load_yaml
 from .constants import TYPE_METADATA_FIELD, SELF_METADATA_FIELD, SUPER_METADATA_FIELD, LIST_TYPE, DEFAULT_CONFIG_NAME_KEY
 from .expansion import map_and_expand
 from .ModuleName import ModuleName
+from .exception import InvalidConfigException
 
 
 object_types = {}
@@ -114,3 +115,12 @@ def make_configs(path: str, type_specification_root: str, verbose: bool = False,
             print(config)
 
     return parsed_configs
+
+
+def make_config(*args, **kwargs):
+    configs = make_configs(*args, **kwargs)
+
+    if (n_configs := len(configs)) != 1:
+        raise InvalidConfigException(message = f'There must be generated exactly 1 config, but found {n_configs}')
+
+    return configs[0]
