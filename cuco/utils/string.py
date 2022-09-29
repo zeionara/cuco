@@ -53,11 +53,16 @@ def module_name_to_path(name: str):
 
 
 def substitute_linked_values(kwargs: dict):
-    for key, value in kwargs.items():
-        if isinstance(value, str):
-            for match_ in LINKED_FIELD_NAME.finditer(value):
-                field_reference = match_.group(0)
-                field_name = match_.group(1)
-                if (referenced_value := kwargs.get(field_name)) is not None:
-                    value = value.replace(field_reference, referenced_value)
-        kwargs[key] = value
+    n_substituted_values = None
+
+    while (n_substituted_values is None or n_substituted_values > 0):
+        n_substituted_values = 0
+        for key, value in kwargs.items():
+            if isinstance(value, str):
+                for match_ in LINKED_FIELD_NAME.finditer(value):
+                    n_substituted_values += 1
+                    field_reference = match_.group(0)
+                    field_name = match_.group(1)
+                    if (referenced_value := kwargs.get(field_name)) is not None:
+                        value = value.replace(field_reference, referenced_value)
+            kwargs[key] = value
