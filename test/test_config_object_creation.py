@@ -34,6 +34,15 @@ class TestConfigObjectCreation(TestCase):
 
         self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')
 
+    def test_flat_config_with_two_fields_and_custom_name_prefix(self):
+        configs = make_configs(
+            path = 'assets/test/foo/custom-name-prefix.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
+        )
+
+        self.assertEqual([config.name for config in configs], ['custom;foo=17', 'custom;foo=18'])
+
+        self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')
+
     def test_config_with_superclass_and_list_field(self):
         configs = make_configs(
             path = 'assets/test/bar/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
