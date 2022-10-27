@@ -5,7 +5,7 @@ with open('README.md', 'r') as description_file:
 
 setup(
     name='cuco',
-    version='0.8.0',
+    version='0.9.0',
     description='Project for making it easier to write configuration files which may be automatically converted into a set of alternative system setups',
     url='https://github.com/zeionara/cuco',
     author='Zeio Nara',
