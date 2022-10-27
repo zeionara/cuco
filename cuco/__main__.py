@@ -75,6 +75,8 @@ def config_parser(object_type: str = None, module_name: str = None):
 def load(config: dict):  # Initialize classes with given config moving from the deepest object to the top
     config = dict(config)
 
+    print(config)
+
     if TYPE_METADATA_FIELD not in config:
         raise ValueError('Cannot obtain target object type from config')
 

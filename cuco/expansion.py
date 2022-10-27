@@ -10,7 +10,7 @@ def should_be_expanded(config: dict, key: str):
         return True
 
     if (meta := config.ca.items.get(key)):
-        return not meta[2].value.startswith(f'# {SHOULD_NOT_BE_EXPANDED_MARK}')
+        return meta[2] is None or not meta[2].value.startswith(f'# {SHOULD_NOT_BE_EXPANDED_MARK}')
 
     return True
 
@@ -20,7 +20,7 @@ def should_not_be_expanded(config: dict, key: str):  # Checks fields with type '
         return True
 
     if (meta := config.ca.items.get(key)):
-        return not meta[2].value.startswith(f'# {SHOULD_BE_EXPANDED_MARK}')
+        return meta[2] is None or not meta[2].value.startswith(f'# {SHOULD_BE_EXPANDED_MARK}')
 
     return True
 
