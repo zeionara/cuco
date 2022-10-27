@@ -76,7 +76,8 @@ def load(config: dict):  # Initialize classes with given config moving from the 
     config = dict(config)
 
     if TYPE_METADATA_FIELD not in config:
-        raise ValueError('Cannot obtain target object type from config')
+        # raise ValueError('Cannot obtain target object type from config')
+        return config
 
     object_type = config[TYPE_METADATA_FIELD]
 
