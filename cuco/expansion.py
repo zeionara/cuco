@@ -2,7 +2,7 @@ from typing import List, Tuple
 from dataclasses import dataclass
 
 from .utils.string import is_metadata_field
-from .constants import TYPE_METADATA_FIELD, SELF_METADATA_FIELD, LIST_TYPE, DEFAULT_CONFIG_NAME_KEY, SHOULD_NOT_BE_EXPANDED_MARK
+from .constants import TYPE_METADATA_FIELD, SELF_METADATA_FIELD, LIST_TYPE, DEFAULT_CONFIG_NAME_KEY, SHOULD_NOT_BE_EXPANDED_MARK, SHOULD_BE_EXPANDED_MARK
 
 
 def should_be_expanded(config: dict, key: str):
@@ -11,6 +11,16 @@ def should_be_expanded(config: dict, key: str):
 
     if (meta := config.ca.items.get(key)):
         return not meta[2].value.startswith(f'# {SHOULD_NOT_BE_EXPANDED_MARK}')
+
+    return True
+
+
+def should_not_be_expanded(config: dict, key: str):  # Checks fields with type 'list' for whether they should be expanded or not
+    if not hasattr(config, 'ca'):
+        return True
+
+    if (meta := config.ca.items.get(key)):
+        return not meta[2].value.startswith(f'# {SHOULD_BE_EXPANDED_MARK}')
 
     return True
 
@@ -111,15 +121,19 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
     updated_configs = []
 
     for config in configs:
+        # print('current config: ', config)
         current_value = config.pop(current_key)
+        # print('current key: ', current_key)
+        # print('current value: ', current_value)
         # mapped_key = current_key if mapping is None else mapping[current_key]
 
         if is_not_metadata_field and isinstance(current_value, (list, set, tuple)) and should_be_expanded(config, current_key):
             if mapping.data is not None and (nested_mapping := mapping.data.get(current_key)) is not None and isinstance(nested_mapping, dict): 
+                # print(config)
                 assert set(nested_mapping.keys()) == {SELF_METADATA_FIELD, TYPE_METADATA_FIELD}, 'Invalid field specification - type definitions corresponding to lists must contain exactly two fields'
 
                 current_value_type = nested_mapping[TYPE_METADATA_FIELD]
-                if current_value_type == LIST_TYPE:
+                if current_value_type == LIST_TYPE and should_not_be_expanded(config, current_key):
                     current_name_mapping = nested_mapping[SELF_METADATA_FIELD]
                     config[current_name_mapping] = current_value
                     updated_configs.append(dict(config))
@@ -134,12 +148,12 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
                         mapping = mapping.get_mapping_of_nested_fields(current_key),
                         config_name_key = config_name_key
                     ):
-                        new_config = dict(config)
+                        new_config = config.copy()
                         new_config[mapped_key] = value_
                         updated_configs.append(new_config)
                         # _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value_copy)  # if root_config is None else root_config
                 else:
-                    new_config = dict(config)
+                    new_config = config.copy()
                     new_config[mapped_key] = value
                     updated_configs.append(new_config)
                     _append_field_to_name(new_config, mapping.add_prefix(current_key), config_name_key, value)  # if root_config is None else root_config
@@ -157,7 +171,7 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
                 config_name_key = config_name_key
                 # root_config = config if root_config is None else root_config
             ):
-                new_config = dict(config)
+                new_config = config.copy()
                 # new_config = config.copy()
                 new_config[mapped_key] = value
 
@@ -165,7 +179,7 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
                 # _append_field_to_name(new_config, current_key, value)
         else:
             config[mapped_key] = current_value
-            updated_configs.append(dict(config))
+            updated_configs.append(config.copy())
 
     return _map_and_expand(keys = keys[1:], configs = updated_configs, mapping = mapping, config_name_key = config_name_key)  # , root_config = root_config)
 

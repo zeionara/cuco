@@ -1,0 +1,7 @@
+_type: foo
+
+foo:
+  - 17
+  - 18
+bar: baz
+name: custom

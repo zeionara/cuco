@@ -1,0 +1,11 @@
+_type: bar
+
+foo:
+  - 17
+  - 18
+bar: baz
+baz: # expand
+  - - 6
+    - 2
+  - - 5
+    - 5

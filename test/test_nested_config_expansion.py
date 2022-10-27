@@ -39,6 +39,19 @@ class TestNestedConfigExpansion(TestCase):
 
         assert len(configs) == 2
 
+    def test_nested_list_which_must_not_be_expanded(self):
+        yaml_config = """
+
+        foo:
+          bar: # as-is
+            - bar
+            - baz
+        """
+
+        configs = map_and_expand(config = load_yaml(string = yaml_config), mapping = {'foo': {'_self': 'bar', 'bar': 'bar'}})
+
+        assert len(configs) == 1
+
 
 if __name__ == "__main__":
     main()

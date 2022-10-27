@@ -50,6 +50,13 @@ class TestConfigObjectCreation(TestCase):
 
         self.assertEqual(len(configs), 2, 'Number of generated configs is not correct')
 
+    def test_config_with_superclass_and_list_field_with_forced_expansion(self):
+        configs = make_configs(
+            path = 'assets/test/bar/force-expand-list-field.yml', type_specification_root = TYPE_SPECIFICATION_ROOT
+        )
+
+        self.assertEqual(len(configs), 4, 'Number of generated configs is not correct')
+
     def test_config_with_custom_object_type_and_field_names(self):
         configs = make_configs(
             path = 'assets/test/qux/default.yml', type_specification_root = TYPE_SPECIFICATION_ROOT

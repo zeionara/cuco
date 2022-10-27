@@ -30,7 +30,21 @@ class TestFlatConfigExpansion(TestCase):
 
         configs = map_and_expand(config = load_yaml(string = yaml_config), mapping = {'foo': 'foo'})
 
-        assert len(configs) == 1
+        self.assertEqual(len(configs), 1)
+
+    def test_list_which_must_be_expanded_and_list_which_must_not_be_expanded(self):
+        yaml_config = """
+        aa:
+          - bb
+          - cc
+        foo:  # as-is
+          - bar
+          - baz
+        """
+
+        configs = map_and_expand(config = load_yaml(string = yaml_config), mapping = {'foo': 'foo', 'aa': 'aa'})
+
+        self.assertEqual(len(configs), 2)
 
     def test_list_which_must_not_be_expanded_with_traling_characters_in_comment(self):
         yaml_config = """
