@@ -10,7 +10,7 @@ def should_be_expanded(config: dict, key: str):
         return True
 
     if (meta := config.ca.items.get(key)):
-        return not meta[2].value.startswith(f'# {SHOULD_NOT_BE_EXPANDED_MARK}')
+        return meta[2] is None or not meta[2].value.startswith(f'# {SHOULD_NOT_BE_EXPANDED_MARK}')
 
     return True
 
@@ -20,7 +20,7 @@ def should_not_be_expanded(config: dict, key: str):  # Checks fields with type '
         return True
 
     if (meta := config.ca.items.get(key)):
-        return not meta[2].value.startswith(f'# {SHOULD_BE_EXPANDED_MARK}')
+        return meta[2] is None or not meta[2].value.startswith(f'# {SHOULD_BE_EXPANDED_MARK}')
 
     return True
 
@@ -164,19 +164,23 @@ def _map_and_expand(keys: Tuple[str], configs: List[dict], mapping: ConfigKeyMap
                 current_value[TYPE_METADATA_FIELD] = nested_mapping[TYPE_METADATA_FIELD]
             # print('making a nested call with root config = ')
             # print(config if root_config is None else root_config)
-            for value in _map_and_expand(
-                sorted(tuple(current_value.keys())),
-                configs = [current_value],
-                mapping = mapping.get_mapping_of_nested_fields(current_key),
-                config_name_key = config_name_key
-                # root_config = config if root_config is None else root_config
-            ):
-                new_config = config.copy()
-                # new_config = config.copy()
-                new_config[mapped_key] = value
+            if current_value.get(TYPE_METADATA_FIELD) is None:
+                config[mapped_key] = current_value  # Do not expand this value
+                updated_configs.append(config.copy())
+            else:
+                for value in _map_and_expand(
+                    sorted(tuple(current_value.keys())),
+                    configs = [current_value],
+                    mapping = mapping.get_mapping_of_nested_fields(current_key),
+                    config_name_key = config_name_key
+                    # root_config = config if root_config is None else root_config
+                ):
+                    new_config = config.copy()
+                    # new_config = config.copy()
+                    new_config[mapped_key] = value
 
-                updated_configs.append(new_config)
-                # _append_field_to_name(new_config, current_key, value)
+                    updated_configs.append(new_config)
+                    # _append_field_to_name(new_config, current_key, value)
         else:
             config[mapped_key] = current_value
             updated_configs.append(config.copy())
